@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input, Button, Form, Select } from 'antd';
 
 const { Option } = Select;
 
-const AddTask = ({ onAdd }) => {
-    const [task, setTask] = useState({ title: '', description: '', priority: 'low' });
+const AddTask = ({ onAdd, taskLists = [] }) => {
+    // Ensure taskLists is an array even if it's undefined or null
+    const [task, setTask] = useState({
+        title: '',
+        description: '',
+        priority: 'low',
+        list: taskLists.length > 0 ? taskLists[0] : '' // Default to the first list if available
+    });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -15,9 +21,19 @@ const AddTask = ({ onAdd }) => {
         setTask((prevTask) => ({ ...prevTask, priority: value }));
     };
 
+    const handleListChange = (value) => {
+        setTask((prevTask) => ({ ...prevTask, list: value }));
+    };
+
     const handleSubmit = () => {
-        onAdd(task); // Pass the new task to the parent component
-        setTask({ title: '', description: '', priority: 'low' }); // Reset form
+        if (!task.title.trim()) return;
+        onAdd(task);
+        setTask({
+            title: '',
+            description: '',
+            priority: 'low',
+            list: taskLists.length > 0 ? taskLists[0] : '' // Reset to the first list
+        });
     };
 
     return (
@@ -49,6 +65,22 @@ const AddTask = ({ onAdd }) => {
                     <Option value="high">High</Option>
                 </Select>
             </Form.Item>
+
+            {/* List Selection */}
+            <Form.Item>
+                <Select
+                    value={task.list}
+                    onChange={handleListChange}
+                    style={{ width: 120 }}
+                >
+                    {taskLists.map((list) => (
+                        <Option key={list} value={list}>
+                            {list}
+                        </Option>
+                    ))}
+                </Select>
+            </Form.Item>
+
             <Form.Item>
                 <Button type="primary" onClick={handleSubmit}>
                     Add Task

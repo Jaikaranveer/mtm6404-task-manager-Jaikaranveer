@@ -14,10 +14,12 @@ const Navbar = () => (
             Jashan Task Book
         </div>
         <Menu mode="horizontal" theme="dark" style={{ backgroundColor: 'transparent' }}>
-            <Menu.Item key="home">Home</Menu.Item>
-            <Menu.Item key="add">Add Task</Menu.Item>
-            <Menu.Item key="about">About</Menu.Item>
-            <Menu.Item key="contact">Contact</Menu.Item>
+            <Menu.Item key="home">
+                <Link to="/">Home</Link>
+            </Menu.Item>
+            <Menu.Item key="add">
+                <Link to="/add">Add Task</Link>
+            </Menu.Item>
         </Menu>
     </div>
 );

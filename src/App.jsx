@@ -1,4 +1,4 @@
-import './App.css'
+import './App.css';
 import React from 'react';
 import { Layout } from 'antd';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import AppFooter from './components/Footer';
 import Home from './components/Home';
 import Wrapper from './components/Wrapper';
+import AddTask from './components/AddTask';
 
 const { Header, Content } = Layout;
 
@@ -20,8 +21,7 @@ const App = () => {
           <Wrapper>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/about" element={<p>About Page</p>} />
-              <Route path="/contact" element={<p>Contact Page</p>} />
+              <Route path="/add" element={<AddTask />} />
             </Routes>
           </Wrapper>
         </Content>

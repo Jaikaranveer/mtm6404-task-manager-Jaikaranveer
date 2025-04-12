@@ -1,31 +1,25 @@
 import React from 'react';
-import { Card, List, Button, Empty } from 'antd';
+import { List, Checkbox, Button } from 'antd';
 
 const TaskList = ({ tasks, onDelete, onToggleComplete }) => {
-    if (tasks.length === 0) {
-        return <Empty description="No tasks added yet." />;
-    }
-
     return (
         <List
+            bordered
             dataSource={tasks}
-            renderItem={(item, index) => (
-                <List.Item style={{ width: '100%' }}>
-                    <Card
-                        title={item.title}
-                        style={{ width: '100%', backgroundColor: item.completed ? '#f0f0f0' : '#fff' }}
+            renderItem={(task) => (
+                <List.Item
+                    actions={[
+                        <Button danger onClick={() => onDelete(task.id)}>Delete</Button>
+                    ]}
+                >
+                    <Checkbox
+                        checked={task.completed}
+                        onChange={() => onToggleComplete(task.id)}
                     >
-                        <p>{item.description}</p>
-                        <p>Priority: {item.priority}</p>
-                        <div>
-                            <Button onClick={() => onToggleComplete(index)}>
-                                {item.completed ? 'Mark Incomplete' : 'Mark Complete'}
-                            </Button>
-                            <Button type="seoondary" onClick={() => onDelete(index)}>
-                                Delete
-                            </Button>
-                        </div>
-                    </Card>
+                        <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
+                            {task.name}
+                        </span>
+                    </Checkbox>
                 </List.Item>
             )}
         />
