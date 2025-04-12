@@ -17,7 +17,7 @@ const TaskList = ({ tasks, onDelete, onToggleComplete }) => {
                         onChange={() => onToggleComplete(task.id)}
                     >
                         <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
-                            {task.name}
+                            {task.title} {"(Priority: " + task.priority + ")"}
                         </span>
                     </Checkbox>
                 </List.Item>

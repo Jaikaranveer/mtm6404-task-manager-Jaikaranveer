@@ -3,52 +3,60 @@ import { Input, Button } from 'antd';
 import TaskList from './TaskList';
 import AddTask from './AddTask';
 import { v4 as uuidv4 } from 'uuid';
+import {
+    getTasks,
+    getTaskLists,
+    getSelectedList,
+    addTask,
+    toggleTaskCompletion,
+    deleteTask,
+    addTaskList,
+    setSelectedList
+} from '../firebase'; // Import Firestore functions
 
 const Home = () => {
     const [tasks, setTasks] = useState([]);
     const [taskLists, setTaskLists] = useState([]);
     const [newListName, setNewListName] = useState('');
-    const [selectedList, setSelectedList] = useState('');
+    const [selectedList, setSelectedListState] = useState('');
     const [filter, setFilter] = useState('all');
 
-    // Load from localStorage on mount
+    // Load data from Firestore on mount
     useEffect(() => {
-        const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        const savedLists = JSON.parse(localStorage.getItem('taskLists')) || [];
-        const savedSelectedList = localStorage.getItem('selectedList') || '';
-        setTasks(savedTasks);
-        setTaskLists(savedLists);
-        setSelectedList(savedSelectedList);
+        const loadData = async () => {
+            const fetchedTasks = await getTasks();
+            const fetchedLists = await getTaskLists();
+            const fetchedSelectedList = await getSelectedList();
+
+            setTasks(fetchedTasks);
+            setTaskLists(fetchedLists);
+            setSelectedListState(fetchedSelectedList);
+        };
+        loadData();
     }, []);
 
-    // Save to localStorage when tasks change
-    useEffect(() => {
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-    }, [tasks]);
-
-    useEffect(() => {
-        localStorage.setItem('taskLists', JSON.stringify(taskLists));
-    }, [taskLists]);
-
-    useEffect(() => {
-        localStorage.setItem('selectedList', selectedList);
-    }, [selectedList]);
-
-    const handleAddTask = (task) => {
+    const handleAddTask = async (task) => {
         const newTask = {
             id: uuidv4(),
-            name: task.name,
+            title: task.title,
+            description: task.description,
+            priority: task.priority,
             completed: false,
             list: selectedList,
         };
+        await addTask(newTask);  // Store task in Firestore
         setTasks((prev) => [...prev, newTask]);
     };
 
-    const handleDeleteTask = (id) => {
+    const handleDeleteTask = async (id) => {
+        await deleteTask(id); // Delete task from Firestore
         setTasks((prev) => prev.filter((task) => task.id !== id));
     };
 
-    const handleToggleComplete = (id) => {
+    const handleToggleComplete = async (id) => {
+        console.log("safsaf", id)
+        const taskToUpdate = tasks.find((task) => task.id === id);
+        await toggleTaskCompletion(id, !taskToUpdate.completed); // Update task completion status in Firestore
         setTasks((prev) =>
             prev.map((task) =>
                 task.id === id ? { ...task, completed: !task.completed } : task
@@ -56,26 +64,36 @@ const Home = () => {
         );
     };
 
-    const handleSelectList = (list) => {
-        setSelectedList(list);
+    const handleSelectList = async (list) => {
+        setSelectedListState(list);
         setFilter('all'); // reset filter when switching lists
+        await setSelectedList(list); // Save selected list to Firestore
     };
 
-    const handleAddList = () => {
+    const handleAddList = async () => {
         const trimmedName = newListName.trim();
         if (trimmedName && !taskLists.includes(trimmedName)) {
+            await addTaskList(trimmedName);  // Add task list to Firestore
             setTaskLists((prev) => [...prev, trimmedName]);
-            setSelectedList(trimmedName);
+            setSelectedListState(trimmedName);
             setNewListName('');
         }
     };
 
-    const filteredTasks = tasks.filter((task) => {
-        if (task.list !== selectedList) return false;
-        if (filter === 'completed') return task.completed;
-        if (filter === 'incomplete') return !task.completed;
-        return true;
-    });
+    const priorityOrder = {
+        high: 3,
+        medium: 2,
+        low: 1,
+    };
+
+    const filteredTasks = tasks
+        .filter((task) => {
+            if (task.list !== selectedList) return false;
+            if (filter === 'completed') return task.completed;
+            if (filter === 'incomplete') return !task.completed;
+            return true;
+        })
+        .sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
 
     const buttonStyle = (currentFilter) => ({
         backgroundColor: filter === currentFilter ? '#1890ff' : 'transparent',
@@ -120,7 +138,7 @@ const Home = () => {
                         <Button style={buttonStyle('completed')} onClick={() => setFilter('completed')}>Show Completed</Button>
                         <Button style={buttonStyle('incomplete')} onClick={() => setFilter('incomplete')}>Show Incomplete</Button>
                     </div>
-                    <AddTask onAdd={handleAddTask} taskLists={taskLists} />
+                    {/* <AddTask onAdd={handleAddTask} taskLists={taskLists} /> */}
                     <TaskList
                         tasks={filteredTasks}
                         onDelete={handleDeleteTask}
