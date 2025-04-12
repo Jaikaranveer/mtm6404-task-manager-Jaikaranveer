@@ -12,7 +12,7 @@ import {
     deleteTask,
     addTaskList,
     setSelectedList
-} from '../firebase'; // Import Firestore functions
+} from '../firebase';
 
 const Home = () => {
     const [tasks, setTasks] = useState([]);
@@ -21,7 +21,7 @@ const Home = () => {
     const [selectedList, setSelectedListState] = useState('');
     const [filter, setFilter] = useState('all');
 
-    // Load data from Firestore on mount
+
     useEffect(() => {
         const loadData = async () => {
             const fetchedTasks = await getTasks();
@@ -44,19 +44,19 @@ const Home = () => {
             completed: false,
             list: selectedList,
         };
-        await addTask(newTask);  // Store task in Firestore
+        await addTask(newTask);
         setTasks((prev) => [...prev, newTask]);
     };
 
     const handleDeleteTask = async (id) => {
-        await deleteTask(id); // Delete task from Firestore
+        await deleteTask(id);
         setTasks((prev) => prev.filter((task) => task.id !== id));
     };
 
     const handleToggleComplete = async (id) => {
         console.log("safsaf", id)
         const taskToUpdate = tasks.find((task) => task.id === id);
-        await toggleTaskCompletion(id, !taskToUpdate.completed); // Update task completion status in Firestore
+        await toggleTaskCompletion(id, !taskToUpdate.completed);
         setTasks((prev) =>
             prev.map((task) =>
                 task.id === id ? { ...task, completed: !task.completed } : task
@@ -66,14 +66,14 @@ const Home = () => {
 
     const handleSelectList = async (list) => {
         setSelectedListState(list);
-        setFilter('all'); // reset filter when switching lists
-        await setSelectedList(list); // Save selected list to Firestore
+        setFilter('all');
+        await setSelectedList(list);
     };
 
     const handleAddList = async () => {
         const trimmedName = newListName.trim();
         if (trimmedName && !taskLists.includes(trimmedName)) {
-            await addTaskList(trimmedName);  // Add task list to Firestore
+            await addTaskList(trimmedName);
             setTaskLists((prev) => [...prev, trimmedName]);
             setSelectedListState(trimmedName);
             setNewListName('');

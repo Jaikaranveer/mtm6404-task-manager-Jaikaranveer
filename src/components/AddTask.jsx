@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { addDoc, collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase'; // Import Firestore database instance
+import { db } from '../firebase';
 import { Input, Button, Form, Select, message } from 'antd';
 
 const { Option } = Select;
@@ -12,28 +12,28 @@ const AddTask = () => {
         title: '',
         description: '',
         priority: 'low',
-        list: '' // Default empty list, will be set later
+        list: ''
     });
 
-    const [taskLists, setTaskLists] = useState([]); // State to store task lists
+    const [taskLists, setTaskLists] = useState([]);
 
     useEffect(() => {
-        // Fetch task lists from Firestore when the component mounts
+
         const fetchTaskLists = async () => {
             try {
                 const querySnapshot = await getDocs(collection(db, 'taskLists'));
                 const lists = querySnapshot.docs.map((doc) => doc.data().name);
                 setTaskLists(lists);
                 if (lists.length > 0) {
-                    setTask((prevTask) => ({ ...prevTask, list: lists[0] })); // Default to first list
+                    setTask((prevTask) => ({ ...prevTask, list: lists[0] }));
                 }
             } catch (error) {
                 console.error('Error fetching task lists:', error);
             }
         };
 
-        fetchTaskLists(); // Fetch task lists
-    }, []); // Run only once when the component mounts
+        fetchTaskLists();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -49,26 +49,26 @@ const AddTask = () => {
     };
 
     const handleSubmit = async () => {
-        if (!task.title.trim()) return; // Do not submit empty title
+        if (!task.title.trim()) return;
 
-        // Add task to Firestore
+
         try {
             await addDoc(collection(db, 'tasks'), {
                 title: task.title,
                 description: task.description,
                 priority: task.priority,
                 list: task.list,
-                createdAt: new Date(), // Optionally include the creation timestamp
+                createdAt: new Date(),
             });
 
             messageApi.info('Task added successfully!');
 
-            // Reset task form after successful submission
+
             setTask({
                 title: '',
                 description: '',
                 priority: 'low',
-                list: taskLists.length > 0 ? taskLists[0] : '', // Reset to the first list
+                list: taskLists.length > 0 ? taskLists[0] : '',
             });
         } catch (error) {
             console.error('Error adding task:', error);
